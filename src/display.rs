@@ -68,7 +68,7 @@ where
         for key in keys {
             match self.symbol_map.get(key) {
                 Some(pixels) => {
-                    let pixels = pixels.clone();
+                    let pixels = *pixels;
                     self.raw_display.set_character(self.sym_index, pixels);
                     self.update_position();
                     self.raw_display.write(self.sym_index);

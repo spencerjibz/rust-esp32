@@ -33,7 +33,7 @@ impl<R: InputPin, C: OutputPin> Keypad<R, C> {
     */
     pub fn read_char(&mut self, delay: &mut dyn DelayNs) -> char {
         let raw = self.read(delay);
-         info!(" raw = {}", raw);
+        info!(" raw = {}", raw);
         if raw != 0 {
             self.get_char(raw)
         } else {
@@ -47,7 +47,7 @@ impl<R: InputPin, C: OutputPin> Keypad<R, C> {
         let mut res = 0;
 
         self.columns.0.set_low().unwrap_or_default();
-        res |= self.read_column(delay) << 0;
+        res |= self.read_column(delay);
         self.columns.0.set_high().unwrap_or_default();
 
         self.columns.1.set_low().unwrap_or_default();

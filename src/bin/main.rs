@@ -7,8 +7,7 @@ use defmt::info;
 use embassy_executor::Spawner;
 use embassy_time::Timer;
 use esp32::{
-    create_open_drain_pin, i2cInterface, ButtonState, ExtendedLcdWriter,
-     BUTTON_STATE,Keypad
+    create_open_drain_pin, i2cInterface, ButtonState, ExtendedLcdWriter, Keypad, BUTTON_STATE,
 };
 use esp_backtrace as _;
 use esp_hal::delay::Delay;
@@ -104,12 +103,12 @@ async fn handle_reads(
         //    }
         //    Err(err) => println!("{:?}", err),
         //}
-        let  character = keypad.read_char(&mut delay); 
-             info!("{}", character);
-            let mut temp_string: String<1> = heapless::String::new();
-            temp_string.push(character).ok();
-            extended_writer.raw_display.print(&temp_string);
-        
+        let character = keypad.read_char(&mut delay);
+        info!("{}", character);
+        let mut temp_string: String<1> = heapless::String::new();
+        temp_string.push(character).ok();
+        extended_writer.raw_display.print(&temp_string);
+
         Timer::after_millis(200).await;
     }
 }
