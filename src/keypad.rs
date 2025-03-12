@@ -142,4 +142,4 @@ const KEY_7: u16 = 1 << 2;
 const KEY_8: u16 = 1 << 6;
 const KEY_9: u16 = 1 << 10;
 const KEY_HASH: u16 = 1 << 11;
-const KEY_STAR:u16 = 1 << 3;
+const KEY_STAR: u16 = 1 << 3;

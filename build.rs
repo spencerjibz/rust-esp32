@@ -58,13 +58,13 @@ fn create_display_symbols() {
         fs::read_to_string(symbols_file_path).expect("can't find display_symbols files");
     let symbols: HashMap<&str, [u8; 8]> = serde_json::from_str(&symbols_json).unwrap();
     let char_map = CharBitMap { map: symbols };
-    let  bytes = to_stdvec(&char_map).unwrap();
+    let bytes = to_stdvec(&char_map).unwrap();
 
     if Path::new(symbols_file_postcard).exists() {
         fs::remove_file(symbols_file_postcard).unwrap();
     }
     let mut file = fs::File::create_new(symbols_file_postcard)
         .expect("failed to create symbols in postcode format");
-    file.write_all(& bytes)
+    file.write_all(&bytes)
         .expect("failed to write symbols in postcard format");
 }

@@ -10,12 +10,12 @@ use embassy_time::Timer;
 use esp32::{
     create_open_drain_pin, i2cInterface, ButtonState, ExtendedLcdWriter, Keypad, BUTTON_STATE,
 };
+use esp_hal::clock::CpuClock;
 use esp_hal::delay::Delay;
 use esp_hal::gpio::{AnyPin, Flex, Input, InputConfig, Level, Output, OutputConfig, Pin, Pull};
 use esp_hal::i2c;
 use esp_hal::i2c::master::Config;
 use esp_hal::time::Rate;
-use esp_hal::clock::CpuClock;
 use esp_hal::timer::systimer::SystemTimer;
 use esp_hal::timer::timg::TimerGroup;
 use {esp_backtrace as _, esp_println as _};
@@ -128,7 +128,7 @@ async fn main(spawner: Spawner) {
         peripherals.RADIO_CLK,
     )
     .unwrap();
-    let config = esp_hal::gpio::InputConfig::default().with_pull(Pull::Up);
+    let _config = esp_hal::gpio::InputConfig::default().with_pull(Pull::Up);
     // let mut button = Input::new(peripherals.GPIO10, config);
     // LCD;
     let sda = peripherals.GPIO17.degrade();
@@ -147,7 +147,7 @@ async fn main(spawner: Spawner) {
         create_open_drain_pin(peripherals.GPIO11.degrade()),
         create_open_drain_pin(peripherals.GPIO10.degrade()),
     );
-    let config = InputConfig::default().with_pull(Pull::None);
+    let _config = InputConfig::default().with_pull(Pull::None);
     let cols = (
         Flex::new(peripherals.GPIO9.degrade()),
         Flex::new(peripherals.GPIO46.degrade()),
