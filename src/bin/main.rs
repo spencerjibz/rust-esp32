@@ -1,14 +1,14 @@
 #![no_std]
 #![no_main]
 #![feature(lazy_get)]
-use core::sync::atomic::Ordering;
-
 use ag_lcd::{Cursor, LcdDisplay};
+use core::sync::atomic::Ordering;
 use defmt::info;
 use embassy_executor::Spawner;
 use embassy_time::Timer;
 use esp32::{
-    create_open_drain_pin, i2cInterface, ButtonState, ExtendedLcdWriter, Keypad, BUTTON_STATE,
+    create_open_drain_pin, float_to_str, i2cInterface, round, ButtonState, ExtendedLcdWriter,
+    Keypad, BUTTON_STATE,
 };
 use esp_hal::clock::CpuClock;
 use esp_hal::delay::Delay;
@@ -18,6 +18,7 @@ use esp_hal::i2c::master::Config;
 use esp_hal::time::Rate;
 use esp_hal::timer::systimer::SystemTimer;
 use esp_hal::timer::timg::TimerGroup;
+use esp_println::println;
 use {esp_backtrace as _, esp_println as _};
 
 use heapless::String;
@@ -90,24 +91,24 @@ async fn handle_reads(
                 extended_writer.raw_display.display_off();
             }
         };
-        //match mpu.temperature() {
-        //    Ok(reading) => {
-        //        let mut temp_string: String<128> = heapless::String::new();
-        //        _ = temp_string.push_str("Temp-> ");
-        //        let temp_str = float_to_str(round(reading.celsius(), 2));
-        //        _ = temp_string.push_str(&temp_str);
-        //        _ = temp_string.push_str(" :cdot: C");
-        //        extended_writer.home();
-        //        //extended_writer.set_static();
-        //        extended_writer.print_at(&temp_string, 0);
-        //    }
-        //    Err(err) => println!("{:?}", err),
-        //}
-        let character = keypad.read_char(&mut delay);
-        info!("{}", character);
-        let mut temp_string: String<1> = heapless::String::new();
-        temp_string.push(character).ok();
-        extended_writer.raw_display.print(&temp_string);
+        match mpu.temperature() {
+            Ok(reading) => {
+                let mut temp_string: String<128> = heapless::String::new();
+                _ = temp_string.push_str("Temp-> ");
+                let temp_str = float_to_str(round(reading.celsius(), 2));
+                _ = temp_string.push_str(&temp_str);
+                _ = temp_string.push_str(" :cdot: C");
+                extended_writer.home();
+                //extended_writer.set_static();
+                extended_writer.print_at(&temp_string, 0);
+            }
+            Err(err) => println!("{:?}", err),
+        }
+        // let character = keypad.read_char(&mut delay);
+        // info!("{}", character);
+        // let mut temp_string: String<1> = heapless::String::new();
+        // temp_string.push(character).ok();
+        // extended_writer.raw_display.print(&temp_string);
 
         Timer::after_millis(200).await;
     }
