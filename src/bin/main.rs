@@ -1,30 +1,30 @@
 #![no_std]
 #![no_main]
 #![feature(lazy_get)]
-use ag_lcd::{Cursor, LcdDisplay};
 use core::sync::atomic::Ordering;
+
+use ag_lcd::{Cursor, LcdDisplay};
 use defmt::info;
 use embassy_executor::Spawner;
 use embassy_time::Timer;
 use esp32::{
     create_open_drain_pin, i2cInterface, ButtonState, ExtendedLcdWriter, Keypad, BUTTON_STATE,
 };
-use esp_backtrace as _;
 use esp_hal::delay::Delay;
-use esp_hal::gpio::{Flex, Input, InputConfig, Level, Output, OutputConfig, Pull};
+use esp_hal::gpio::{AnyPin, Flex, Input, InputConfig, Level, Output, OutputConfig, Pin, Pull};
 use esp_hal::i2c;
 use esp_hal::i2c::master::Config;
 use esp_hal::time::Rate;
+use esp_hal::clock::CpuClock;
 use esp_hal::timer::systimer::SystemTimer;
 use esp_hal::timer::timg::TimerGroup;
-use esp_hal::{
-    clock::CpuClock,
-    gpio::{AnyPin, Pin},
-};
+use {esp_backtrace as _, esp_println as _};
+
 use heapless::String;
 use mpu6050_dmp::address::Address;
 use mpu6050_dmp::sensor::Mpu6050;
 use port_expander::Pcf8574;
+extern crate alloc;
 #[embassy_executor::task]
 async fn blink(pin: AnyPin) {
     let mut led = Output::new(pin, Level::Low, OutputConfig::default().with_pull(Pull::Up));
@@ -57,7 +57,7 @@ async fn handle_reads(
         .unwrap()
         .with_scl(scl)
         .with_sda(sda);
-    let config = InputConfig::default().with_pull(Pull::None);
+    let config = esp_hal::gpio::InputConfig::default().with_pull(Pull::None);
     let switch = Input::new(switch_pin, config);
     let mut i2c_expander = Pcf8574::new(i2c_bus, true, true, true);
     let delay = Delay::new();
@@ -128,7 +128,7 @@ async fn main(spawner: Spawner) {
         peripherals.RADIO_CLK,
     )
     .unwrap();
-    let config = InputConfig::default().with_pull(Pull::Up);
+    let config = esp_hal::gpio::InputConfig::default().with_pull(Pull::Up);
     // let mut button = Input::new(peripherals.GPIO10, config);
     // LCD;
     let sda = peripherals.GPIO17.degrade();
@@ -154,7 +154,7 @@ async fn main(spawner: Spawner) {
         Flex::new(peripherals.GPIO3.degrade()),
         Flex::new(peripherals.GPIO8.degrade()),
     );
-    let keypad = Keypad::new(rows, cols);
+    let keypad = Keypad::new(cols, rows);
     spawner
         .spawn(handle_reads(
             lcd_pins,
