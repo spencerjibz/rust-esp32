@@ -51,7 +51,7 @@ async fn handle_reads(
     lcd_pins: i2cInterface,
     sensor_pins: i2cInterface,
     switch_pin: AnyPin,
-    mut keypad: Keypad<Flex<'static>, Flex<'static>>,
+    _keypad: Keypad<Flex<'static>, Flex<'static>>,
 ) {
     let i2cInterface { scl, sda, i2c } = lcd_pins;
     let i2c_bus = i2c::master::I2c::new(i2c, Config::default())

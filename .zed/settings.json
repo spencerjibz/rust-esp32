@@ -1,0 +1,45 @@
+{
+  "editor.font_size": 14,
+  "editor.insert_final_newline": true,
+  "editor.trim_trailing_whitespace": true,
+  "editor.format_on_save": true,
+  "editor.line_numbers": true,
+  "editor.word_wrap": "on",
+  "editor.auto_save": "afterDelay",
+  "editor.auto_complete": true,
+  "files.exclude": [
+    "node_modules/",
+    ".git/",
+    "dist/",
+    "build/"
+  ],
+  "lsp": {
+    "rust-analyzer": {
+      "initialization_options": {
+        // get more cargo-less diagnostics from rust-analyzer,
+        // which might include false-positives (those can be turned off by their names)
+        "diagnostics": {
+          "experimental": {
+            "enable": true
+          }
+        },
+        // To disable the checking entirely
+        // To check the `lib` target only.
+        "cargo": {
+          "allTargets": false,
+          "target": "xtensa-esp32s3-none-elf",
+          "extra_env": {
+            "rustup_toolchain": "esp"
+          }
+        },
+        // Use `-p` instead of `--workspace` for cargo check
+        "check": {
+          "workspace": true,
+          "extra_env": {
+            "rustup_toolchain": "esp"
+          }
+        }
+      }
+    }
+  }
+}
