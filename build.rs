@@ -53,7 +53,7 @@ pub struct CharBitMap<'a> {
 fn create_display_symbols() {
     // check for the symbols.json files;
     let symbols_file_path = "./display_symbols.json";
-    let symbols_file_postcard = "./display_symbols.txt";
+    let symbols_file_postcard = "./target/display_symbols.txt";
     let symbols_json =
         fs::read_to_string(symbols_file_path).expect("can't find display_symbols files");
     let symbols: HashMap<&str, [u8; 8]> = serde_json::from_str(&symbols_json).unwrap();

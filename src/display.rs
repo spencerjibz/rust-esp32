@@ -112,7 +112,7 @@ where
 impl<const N: usize> CharBitMap<'_, N> {
     pub fn init() -> Self {
         // get the values for our json file
-        let symbol_data: &[u8] = include_bytes!("../display_symbols.txt");
+        let symbol_data: &[u8] = include_bytes!("../target/display_symbols.txt");
         let map: CharBitMap<N> = from_bytes(symbol_data).expect("failed to serialized");
         info!("screen symbols and emojis loaded!");
         map
