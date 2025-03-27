@@ -141,9 +141,9 @@ async fn main(spawner: Spawner) {
     let sensor_pins = i2cInterface::new(scl, sda, i2c);
     // keypad;
     let rows = (
-        Input::new(peripherals.GPIO13.degrade(), config.clone()),
-        Input::new(peripherals.GPIO12.degrade(), config.clone()),
-        Input::new(peripherals.GPIO11.degrade(), config.clone()),
+        Input::new(peripherals.GPIO13.degrade(), config),
+        Input::new(peripherals.GPIO12.degrade(), config),
+        Input::new(peripherals.GPIO11.degrade(), config),
         Input::new(peripherals.GPIO10.degrade(), config),
     );
     let _config = InputConfig::default().with_pull(Pull::None);
