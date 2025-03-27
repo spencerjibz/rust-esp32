@@ -31,12 +31,10 @@ async fn blink(pin: AnyPin) {
     let mut led = Output::new(pin, Level::Low, OutputConfig::default().with_pull(Pull::Up));
     loop {
         let state = ButtonState::from(BUTTON_STATE.load(Ordering::Relaxed));
-
         match state {
             ButtonState::Pressed => {
                 if led.is_set_low() {
                     info!("{}", state.to_printable());
-
                     led.set_high();
                 }
             }
@@ -51,7 +49,7 @@ async fn handle_reads(
     lcd_pins: i2cInterface,
     sensor_pins: i2cInterface,
     switch_pin: AnyPin,
-    _keypad: Keypad<Flex<'static>, Flex<'static>>,
+    mut keypad: Keypad<Input<'static>, Flex<'static>>,
 ) {
     let i2cInterface { scl, sda, i2c } = lcd_pins;
     let i2c_bus = i2c::master::I2c::new(i2c, Config::default())
@@ -72,7 +70,6 @@ async fn handle_reads(
         .unwrap()
         .with_scl(scl)
         .with_sda(sda);
-
     let mut mpu = Mpu6050::new(i2c_bus, Address::default()).unwrap();
     let mut delay = Delay::new();
     mpu.initialize_dmp(&mut delay)
@@ -80,7 +77,7 @@ async fn handle_reads(
     let mut extended_writer = ExtendedLcdWriter::new(&mut lcd);
     extended_writer.print(":heart: Welcome :heart:");
     extended_writer.print(":cdot: :sdot: :circle:");
-    // extended_writer.print(":ascchart: :arrowright:");
+    extended_writer.print(":ascchart: :arrowright:");
     loop {
         let state = switch.is_low();
         match state {
@@ -104,11 +101,12 @@ async fn handle_reads(
             }
             Err(err) => println!("{:?}", err),
         }
-        // let character = keypad.read_char(&mut delay);
-        // info!("{}", character);
-        // let mut temp_string: String<1> = heapless::String::new();
-        // temp_string.push(character).ok();
-        // extended_writer.raw_display.print(&temp_string);
+        if let Some(character) = keypad.read_char(&mut delay) {
+            info! {"{}", character};
+            let mut temp_string: String<1> = heapless::String::new();
+            temp_string.push(character).ok();
+            extended_writer.raw_display.print(&temp_string);
+        }
 
         Timer::after_millis(200).await;
     }
@@ -129,7 +127,7 @@ async fn main(spawner: Spawner) {
         peripherals.RADIO_CLK,
     )
     .unwrap();
-    let _config = esp_hal::gpio::InputConfig::default().with_pull(Pull::Up);
+    let config = esp_hal::gpio::InputConfig::default().with_pull(Pull::Up);
     // let mut button = Input::new(peripherals.GPIO10, config);
     // LCD;
     let sda = peripherals.GPIO17.degrade();
@@ -143,19 +141,19 @@ async fn main(spawner: Spawner) {
     let sensor_pins = i2cInterface::new(scl, sda, i2c);
     // keypad;
     let rows = (
-        create_open_drain_pin(peripherals.GPIO13.degrade()),
-        create_open_drain_pin(peripherals.GPIO12.degrade()),
-        create_open_drain_pin(peripherals.GPIO11.degrade()),
-        create_open_drain_pin(peripherals.GPIO10.degrade()),
+        Input::new(peripherals.GPIO13.degrade(), config.clone()),
+        Input::new(peripherals.GPIO12.degrade(), config.clone()),
+        Input::new(peripherals.GPIO11.degrade(), config.clone()),
+        Input::new(peripherals.GPIO10.degrade(), config),
     );
     let _config = InputConfig::default().with_pull(Pull::None);
     let cols = (
-        Flex::new(peripherals.GPIO9.degrade()),
-        Flex::new(peripherals.GPIO46.degrade()),
-        Flex::new(peripherals.GPIO3.degrade()),
-        Flex::new(peripherals.GPIO8.degrade()),
+        create_open_drain_pin(peripherals.GPIO9.degrade()),
+        create_open_drain_pin(peripherals.GPIO46.degrade()),
+        create_open_drain_pin(peripherals.GPIO3.degrade()),
+        create_open_drain_pin(peripherals.GPIO8.degrade()),
     );
-    let keypad = Keypad::new(cols, rows);
+    let keypad = Keypad::new(rows, cols);
     spawner
         .spawn(handle_reads(
             lcd_pins,

@@ -1,4 +1,4 @@
-use defmt::info;
+// Based on work by John Socha-Leialoha (https://github.com/johnSL/keypad2)
 use embedded_hal::delay::DelayNs;
 use embedded_hal::digital::{InputPin, OutputPin};
 
@@ -31,14 +31,9 @@ impl<R: InputPin, C: OutputPin> Keypad<R, C> {
     * `'#'`
     * `' '` if no keys are pressed.
     */
-    pub fn read_char(&mut self, delay: &mut dyn DelayNs) -> char {
+    pub fn read_char(&mut self, delay: &mut dyn DelayNs) -> Option<char> {
         let raw = self.read(delay);
-        info!(" raw = {}", raw);
-        if raw != 0 {
-            self.get_char(raw)
-        } else {
-            ' '
-        }
+        self.get_char(raw)
     }
 
     // Performs a "raw" read of the keypad and returns a bit set for each key down. Note,
@@ -66,17 +61,16 @@ impl<R: InputPin, C: OutputPin> Keypad<R, C> {
 
     // Converts the raw value from the read() method into a character that corresponds to the
     // label on each key
-    fn get_char(&self, raw_value: u16) -> char {
+    fn get_char(&self, raw_value: u16) -> Option<char> {
         let value = self.convert(raw_value);
-        info!("{}", value);
         match value {
-            -1 => '*',
-            -2 => '#',
-            -3 => 'A',
-            -4 => 'B',
-            -5 => 'C',
-            -6 => 'D',
-            _ => char::from_digit(value as u32, 10).unwrap(),
+            -1 => Some('*'),
+            -2 => Some('#'),
+            -3 => Some('A'),
+            -4 => Some('B'),
+            -5 => Some('C'),
+            -6 => Some('D'),
+            _ => char::from_digit(value as u32, 10),
         }
     }
 
